@@ -266,6 +266,13 @@ CSS = ("*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}"
        ".st-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;"
        "font-weight:500;background:#F1F5F9;color:#64748B;white-space:nowrap}"
        ".updated-note{font-size:12px;color:#9CA3AF;text-align:center;margin-top:32px;padding-bottom:8px}"
+       ".refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;"
+       "border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;"
+       "border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);"
+       "color:#CBD5E1;font-family:inherit;transition:all .15s}"
+       ".refresh-btn:hover{background:rgba(255,255,255,.16);color:#fff}"
+       ".refresh-btn svg{transition:transform .5s}"
+       ".refresh-btn:hover svg{transform:rotate(180deg)}"
        "@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(3,1fr)}"
        ".charts-row{grid-template-columns:1fr}}"
        "@media(max-width:720px){.stat-grid{grid-template-columns:repeat(2,1fr)}"
@@ -443,7 +450,13 @@ def generate_html(pcrs, timestamp):
         '<header><div class="hdr-left"><div class="logo">\U0001f955</div>'
         '<div><div class="hdr-title">PCR Theme Dashboard</div>'
         '<div class="hdr-sub">Omar Tarabichi \u00b7 Instacart \u00b7 Open PCRs</div></div></div>'
-        f'<div class="hdr-right">Data as of {timestamp}</div></header>\n'
+        '<div style="display:flex;align-items:center;gap:14px">'
+        f'<div class="hdr-right">Data as of {timestamp}</div>'
+        '<button class="refresh-btn" onclick="location.reload()" title="Reload page to get latest data">'
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">'
+        '<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>'
+        '<path d="M21 3v5h-5"/></svg>Refresh</button>'
+        '</div></header>\n'
         "<main>\n"
         f'<div class="stat-grid">{stat_cards}</div>\n'
         '<div class="charts-row">\n'
