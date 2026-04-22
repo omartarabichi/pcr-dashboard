@@ -273,6 +273,7 @@ CSS = ("*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}"
        ".refresh-btn:hover{background:rgba(255,255,255,.16);color:#fff}"
        ".refresh-btn svg{transition:transform .5s}"
        ".refresh-btn:hover svg{transform:rotate(180deg)}"
+       "@keyframes spin{to{transform:rotate(360deg)}}"
        "@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(3,1fr)}"
        ".charts-row{grid-template-columns:1fr}}"
        "@media(max-width:720px){.stat-grid{grid-template-columns:repeat(2,1fr)}"
@@ -422,6 +423,36 @@ def generate_html(pcrs, timestamp):
     jira_url = (f'https://instacart.atlassian.net/jira/software/c/projects/PCR/list'
                 f'?filter=assignee%20%3D%20{ASSIGNEE}&hideDone=true')
 
+    refresh_js = (
+        "function triggerRefresh(){"
+        "var btn=document.getElementById('refresh-btn');"
+        "var lbl=document.getElementById('refresh-label');"
+        "var icon=document.getElementById('refresh-icon');"
+        "btn.disabled=true;btn.style.opacity='0.6';"
+        "icon.style.animation='spin 1s linear infinite';"
+        "lbl.textContent='Syncing\u2026';"
+        "fetch('/.netlify/functions/dispatch')"
+        ".then(function(r){"
+        "if(r.status===204||r.ok){"
+        "var secs=90;"
+        "lbl.textContent='Reloading in '+secs+'s';"
+        "var iv=setInterval(function(){"
+        "secs--;"
+        "if(secs<=0){clearInterval(iv);location.reload();}"
+        "else{lbl.textContent='Reloading in '+secs+'s';}"
+        "},1000);"
+        "}else{"
+        "lbl.textContent='Error \u2014 try again';"
+        "btn.disabled=false;btn.style.opacity='1';"
+        "icon.style.animation='';}"
+        "})"
+        ".catch(function(){"
+        "lbl.textContent='Error \u2014 try again';"
+        "btn.disabled=false;btn.style.opacity='1';"
+        "icon.style.animation='';});"
+        "}"
+    )
+
     search_js = (
         "function toggle(hdr){var body=hdr.nextElementSibling;"
         "var ch=hdr.querySelector('.chevron');body.classList.toggle('open');"
@@ -452,10 +483,11 @@ def generate_html(pcrs, timestamp):
         '<div class="hdr-sub">Omar Tarabichi \u00b7 Instacart \u00b7 Open PCRs</div></div></div>'
         '<div style="display:flex;align-items:center;gap:14px">'
         f'<div class="hdr-right">Data as of {timestamp}</div>'
-        '<button class="refresh-btn" onclick="location.reload()" title="Reload page to get latest data">'
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">'
+        '<button class="refresh-btn" id="refresh-btn" onclick="triggerRefresh()">'
+        '<svg id="refresh-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">'
         '<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>'
-        '<path d="M21 3v5h-5"/></svg>Refresh</button>'
+        '<path d="M21 3v5h-5"/></svg>'
+        '<span id="refresh-label">Sync Jira</span></button>'
         '</div></header>\n'
         "<main>\n"
         f'<div class="stat-grid">{stat_cards}</div>\n'
@@ -488,6 +520,7 @@ def generate_html(pcrs, timestamp):
         "<script>\n"
         + donut_js + "\n"
         + bar_js + "\n"
+        + refresh_js + "\n"
         + search_js + "\n"
         + "</script></body></html>"
     )
